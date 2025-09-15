@@ -1,0 +1,78 @@
+                    Create a servlet application to download a file.6
+                                 Index.html
+<html> 
+<head><title>File Upload & Download</title></head> 
+<body> 
+<h1>Upload a File</h1> 
+<form action="UploadServlet" method="post" enctype="multipart/form-data"> 
+Select File: <input type="file" name="f1"><br> 
+Destination Folder: <input type="text" value="C:\temp" name="destination"><br> 
+<input type="submit" value="Upload File"> 
+</form> 
+<hr> 
+<h1>Download a File</h1> 
+<form action="DownloadServlet" method="get"> 
+Enter File Path: <input type="text" name="filepath" value="C:\Users\Manish\OneDrive\Desktop\test.html"><br> 
+<input type="submit" value="Download File"> 
+</form> 
+</body> 
+</html>
+                                    UploadServlet.java
+package mypack; 
+import java.io.*; 
+import javax.servlet.*; 
+import javax.servlet.annotation.MultipartConfig; 
+import javax.servlet.http.*; 
+@MultipartConfig 
+public class UploadServlet extends HttpServlet { 
+    public void doPost(HttpServletRequest req, HttpServletResponse res) 
+            throws IOException, ServletException { 
+        res.setContentType("text/html;charset=UTF-8"); 
+        PrintWriter out = res.getWriter(); 
+        String path = req.getParameter("destination"); 
+        Part filePart = req.getPart("f1"); 
+        String filename = filePart.getSubmittedFileName(); 
+        try (InputStream is = filePart.getInputStream(); 
+             OutputStream os = new FileOutputStream(new File(path, filename))) { 
+            byte[] buffer = new byte[1024]; 
+            int bytesRead; 
+            while ((bytesRead = is.read(buffer)) != -1) { 
+                os.write(buffer, 0, bytesRead); 
+            } 
+            out.println("<h1>File uploaded successfully: " + filename + "</h1>"); 
+            out.println("<p>Saved at: " + path + "</p>"); 
+        } catch (Exception e) { 
+            out.println("<h1>Error: " + e.getMessage() + "</h1>"); 
+        } 
+    } 
+}
+                                 DownloadServlet.java
+package mypack; 
+import java.io.*; 
+import javax.servlet.*; 
+import javax.servlet.http.*; 
+public class DownloadServlet extends HttpServlet { 
+    public void doGet(HttpServletRequest req, HttpServletResponse res) 
+            throws IOException, ServletException { 
+        String filepath = req.getParameter("filepath"); 
+        File file = new File(filepath); 
+        if (!file.exists()) { 
+            res.setContentType("text/html"); 
+            PrintWriter out = res.getWriter(); 
+            out.println("<h1>File not found: " + filepath + "</h1>"); 
+            return; 
+        } 
+        res.setContentType("application/octet-stream"); 
+        res.setHeader("Content-Disposition", "attachment; filename=\"" + file.getName() + "\""); 
+ 
+        try (FileInputStream fis = new FileInputStream(file); 
+             OutputStream os = res.getOutputStream()) { 
+ 
+            byte[] buffer = new byte[1024]; 
+            int bytesRead; 
+            while ((bytesRead = fis.read(buffer)) != -1) { 
+os.write(buffer, 0, bytesRead); 
+} 
+} 
+} 
+} 
