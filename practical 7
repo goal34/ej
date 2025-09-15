@@ -1,0 +1,82 @@
+               Develop simple servlet question answer application using database.7
+                                    index.html
+<html><head><title>Quiz Application</title></head> 
+<body> 
+<h1>Welcome to Quiz Servlet</h1> 
+<h1><a href="QuizServlet" >CLICK TO START QUIZ</a></h1> 
+</body> 
+</html>
+                                      Mysql(page entry):
+INSERT INTO DATA VALUES('001','What is the capital of India??','NewDelhi','Kolkata','Chennai','Mumbai','New Delhi'); 
+INSERT INTO DATA VALUES('002','Who was the First President of India??','Dr. Rajendra Prasad','Dr. S.Radhakrishnan','Ram Nath Kovind','V. V. Giri','Dr. Rajendra Prasad'); 
+INSERT INTO DATA VALUES('003','What is ORM','Object Ratio Mean','Object Rotation Measure','ObjectRelation Mapping','Oracle Request Management','Object Relation Mapping'); 
+INSERT INTO DATA VALUES('004','Unit of Energy is ___','Dozon','Kilo Meter ','Joul','Hertz','Joul'); 
+INSERT INTO DATA VALUES('005',' --- is the smallest memory unit.','bit','byte','Kilo Byte','Giga Byte','bit'); 
+                                   QuizServlet.java
+package mypack; 
+import java.io.*; 
+import java.sql.*;
+import javax.servlet.*; 
+import javax.servlet.http.*; 
+public class QuizServlet extends HttpServlet { 
+    public void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException { 
+        response.setContentType("text/html;charset=UTF-8"); 
+        PrintWriter out = response.getWriter(); 
+        out.println("<form action=ShowResult >"); 
+        try { 
+            Class.forName("org.apache.derby.jdbc.ClientDriver"); 
+            Connection con = DriverManager.getConnection("jdbc:derby://localhost:1527/quiz","root","root"); 
+            Statement stmt = con.createStatement(); 
+            ResultSet res = stmt.executeQuery("select * from DATA"); 
+            out.println("<table border=1 >"); 
+            int qno=0; 
+            while(res.next()){ 
+                qno++; 
+                out.println("<tr><td>"+res.getString(1)+"</td>"); 
+                out.println("<td>"+res.getString(2)+"</td></tr>"); 
+                out.println("<tr><td><input type='radio' name='"+qno+"' value='"+res.getString(3)+"'></td><td>"+res.getString(3)+"</td></tr>"); 
+                out.println("<tr><td><input type='radio' name='"+qno+"' value='"+res.getString(4)+"'></td><td>"+res.getString(4)+"</td></tr>"); 
+                out.println("<tr><td><input type='radio' name='"+qno+"' value='"+res.getString(5)+"'></td><td>"+res.getString(5)+"</td></tr>"); 
+                out.println("<tr><td><input type='radio' name='"+qno+"' value='"+res.getString(6)+"'></td><td>"+res.getString(6)+"</td></tr>"); 
+            } 
+        }catch(Exception e){
+            out.println(e);
+        } 
+        out.println("</table>"); 
+        out.println("<input type='reset' >"); 
+        out.println("<input type='submit' value='SUBMIT' >"); 
+        out.println("</form>"); 
+    } 
+}
+                                       ShowResult.java
+package mypack; 
+import java.io.*; 
+import java.sql.*; 
+import javax.servlet.*; 
+import javax.servlet.http.*; 
+public class ShowResult extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+throws ServletException, IOException { 
+response.setContentType("text/html;charset=UTF-8"); 
+PrintWriter out = response.getWriter(); 
+try { 
+Class.forName("org.apache.derby.jdbc.ClientDriver"); 
+Connection con = DriverManager.getConnection("jdbc:derby://localhost:1527/Quiz","root","root"); 
+Statement stmt = con.createStatement(); 
+ResultSet res = stmt.executeQuery("select ans from DATA"); 
+int count =0, qno=0; 
+while(res.next()){ 
+if(res.getString(1).equals(request.getParameter(""+(++qno)))) 
+{ count++; 
+out.println("<h1>Correct </h1>"); 
+} 
+else { 
+out.println("<h1>Incorrect </h1>"); 
+} 
+} 
+out.println("<h1>Your Score is "+count+" </h1>"); 
+}catch(Exception e){out.println(e);} 
+}   
+}
+
