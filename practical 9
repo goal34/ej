@@ -1,0 +1,124 @@
+                 Develop a JSP application to pass values from one page to another using validation.9
+                                                 Index.html: 
+<html> 
+<head><title>User Information Page</title></head> 
+<body> 
+<form action="Validate.jsp" method="post"> 
+Enter Your Name: <input type="text" name="name"><br> 
+Enter Your Age: <input type="text" name="age"><br> 
+Select Hobbies:  
+<input type="checkbox" name="hob" value="Singing">Singing 
+<input type="checkbox" name="hob" value="Reading">Reading Books 
+<input type="checkbox" name="hob" value="Football">Playing Football<br> 
+Enter E-mail: <input type="text" name="email"><br> 
+Select Gender: 
+<input type="radio" name="gender" value="male">Male 
+<input type="radio" name="gender" value="female">Female 
+<input type="radio" name="gender" value="other">Other<br> 
+<input type="submit" value="Submit Form"> 
+</form> 
+</body> 
+</html>
+                                                 Validate.jsp(do not write mypack):
+<html> 
+<head><title>Validation Page</title></head> 
+<body> 
+<h1>Validation Page</h1> 
+<jsp:useBean id="obj" scope="request" class="mypack.CheckerBean" > 
+<jsp:setProperty name="obj" property="*"/> 
+</jsp:useBean> 
+<% 
+if (obj.validate()) { 
+%> 
+<jsp:forward page="Successful.jsp"/> 
+<% 
+} else { 
+%> 
+<jsp:include page="index.html"/> 
+<div style="color:red;"> 
+<%=obj.getError() %> 
+</div> 
+<% 
+} 
+%> 
+</body> 
+</html>
+                                                     Successful.jsp(do not write mypack):
+<html> 
+<head><title>Success Page</title></head> 
+<body> 
+<h1>Form Submitted Successfully   
+</h1> 
+<jsp:useBean id="obj" scope="request" class="mypack.CheckerBean" /> 
+<p><b>Name:</b> <%=obj.getName()%></p> 
+<p><b>Age:</b> <%=obj.getAge()%></p> 
+<p><b>Email:</b> <%=obj.getEmail()%></p> 
+<p><b>Gender:</b> <%=obj.getGender()%></p> 
+<p><b>Hobbies:</b> 
+<% 
+String[] hobbies = obj.getHob(); 
+if (hobbies != null) { 
+for (String h : hobbies) { 
+out.print(h + " "); 
+} 
+} else { 
+out.print("None"); 
+} 
+%> 
+</p> 
+</body> 
+</html> 
+                                                        CheckerBean.java(SessionBean):
+package mypack; 
+public class CheckerBean { 
+private String name, age, hob[], email, gender, error; 
+public CheckerBean() { 
+error = ""; 
+} 
+// setters 
+public void setName(String n) { name = n; } 
+public void setAge(String a) { age = a; } 
+public void setHob(String[] h) { hob = h; }  // multiple hobbies 
+public void setEmail(String e) { email = e; } 
+    public void setGender(String g) { gender = g; } 
+    public void setError(String e) { error = e; } 
+ 
+    // getters 
+    public String getName() { return name; } 
+    public String getAge() { return age; } 
+    public String[] getHob() { return hob; } 
+    public String getEmail() { return email; } 
+    public String getGender() { return gender; } 
+    public String getError() { return error; } 
+ 
+    // validation 
+    public boolean validate() { 
+        boolean res = true; 
+        error = "";  // reset before validating 
+ 
+        if (name == null || name.trim().equals("")) { 
+            error += "<br>Enter Name"; 
+            res = false; 
+        } 
+ 
+        if (age == null || !age.matches("\\d+")) { 
+            error += "<br>Enter Valid Age"; 
+            res = false; 
+        } else if (Integer.parseInt(age) < 1 || Integer.parseInt(age) > 120) { 
+            error += "<br>Age Invalid"; 
+            res = false; 
+        } 
+ 
+        if (email == null || !email.matches("^.+@.+\\..+$")) { 
+            error += "<br>Enter Valid Email"; 
+            res = false; 
+        } 
+ 
+        if (gender == null) { 
+            error += "<br>Select Gender"; 
+            res = false; 
+        } 
+ 
+        return res; 
+    } 
+}
